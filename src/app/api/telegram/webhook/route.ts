@@ -22,7 +22,10 @@ bot.start(async (ctx) => {
     },
   });
 
-  const authUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/github?telegram_id=${telegramId}`;
+  // Remove trailing slash from app URL
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || '';
+  const authUrl = `${appUrl}/api/auth/github?telegram_id=${telegramId}`;
+  
   await ctx.reply(
     `👋 Welcome to GitWatch, ${username}!\n\n` +
     `To get started, connect your GitHub account:\n\n` +
