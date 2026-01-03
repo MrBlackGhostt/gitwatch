@@ -16,7 +16,9 @@ export const metadata: Metadata = {
   title: "GitWatch",
   description: "Monitor your GitHub repositories in real-time with GitWatch.",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 

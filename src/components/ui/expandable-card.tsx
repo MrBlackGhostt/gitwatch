@@ -133,7 +133,7 @@ export function ExpandableFeatures() {
                         <div className="flex gap-4 flex-col md:flex-row ">
                             <motion.div layoutId={`image-${card.title}-${id}`}>
                                 <div className={`h-40 w-40 md:h-14 md:w-14 rounded-lg flex items-center justify-center ${card.color} bg-opacity-20`}>
-                                    {React.cloneElement(card.icon as React.ReactElement, { className: "h-6 w-6" })}
+                                    {React.cloneElement(card.icon as React.ReactElement<any>, { className: "h-6 w-6" })}
                                 </div>
                             </motion.div>
                             <div className="">
