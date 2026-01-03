@@ -1,5 +1,4 @@
 import { Telegraf } from 'telegraf';
-import { prisma } from '../prisma';
 
 export function registerHelpCommand(bot: Telegraf) {
   bot.command('help', async (ctx) => {
