@@ -3,6 +3,7 @@ import { Telegraf } from 'telegraf';
 import { registerWatchCommand } from '../../../../../lib/telegram/commands/watch';
 import { registerHelpCommand } from '../../../../../lib/telegram/commands/help';
 import { registerWatchlistCommand } from '../../../../../lib/telegram/commands/watchlist';
+import { registerDisconnectCommand } from '../../../../../lib/telegram/commands/disconnect';
 
 // Initialize bot (without launch - we'll handle updates via webhook)
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
@@ -41,6 +42,16 @@ bot.start(async (ctx) => {
 registerWatchCommand(bot);
 registerHelpCommand(bot);
 registerWatchlistCommand(bot);
+registerDisconnectCommand(bot);
+
+// Set bot commands for UI suggestions
+bot.telegram.setMyCommands([
+  { command: 'start', description: 'Connect your GitHub account' },
+  { command: 'watch', description: 'Watch a repository' },
+  { command: 'watchlist', description: 'View all watched repositories' },
+  { command: 'disconnect', description: 'Disconnect GitHub and remove all watches' },
+  { command: 'help', description: 'Show help message' },
+]);
 
 // Export bot
 export { bot };
