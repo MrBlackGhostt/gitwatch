@@ -133,36 +133,37 @@ function formatEventMessage(event: any, owner: string, repo: string): string | n
         `[View Issue](${issue.html_url})`
       );
 
-    case 'PullRequestEvent':
-      const pr = event.payload.pull_request;
-      return (
-        `🔔 **New PR in ${owner}/${repo}**\n\n` +
-        `**${pr.title}**\n` +
-        `By: @${actor}\n` +
-        `Action: ${event.payload.action}\n\n` +
-        `[View PR](${pr.html_url})`
-      );
+    // Disabled: Only notify on issues
+    // case 'PullRequestEvent':
+    //   const pr = event.payload.pull_request;
+    //   return (
+    //     `🔔 **New PR in ${owner}/${repo}**\n\n` +
+    //     `**${pr.title}**\n` +
+    //     `By: @${actor}\n` +
+    //     `Action: ${event.payload.action}\n\n` +
+    //     `[View PR](${pr.html_url})`
+    //   );
 
-    case 'PushEvent':
-      const commits = event.payload.commits || [];
-      const commitCount = commits.length;
-      return (
-        `🔔 **New Push to ${owner}/${repo}**\n\n` +
-        `By: @${actor}\n` +
-        `Branch: ${event.payload.ref.replace('refs/heads/', '')}\n` +
-        `Commits: ${commitCount}\n\n` +
-        `[View Commits](${repoUrl}/commits)`
-      );
+    // case 'PushEvent':
+    //   const commits = event.payload.commits || [];
+    //   const commitCount = commits.length;
+    //   return (
+    //     `🔔 **New Push to ${owner}/${repo}**\n\n` +
+    //     `By: @${actor}\n` +
+    //     `Branch: ${event.payload.ref.replace('refs/heads/', '')}\n` +
+    //     `Commits: ${commitCount}\n\n` +
+    //     `[View Commits](${repoUrl}/commits)`
+    //   );
 
-    case 'IssueCommentEvent':
-      const comment = event.payload.comment;
-      const commentIssue = event.payload.issue;
-      return (
-        `🔔 **New Comment in ${owner}/${repo}**\n\n` +
-        `On: ${commentIssue.title}\n` +
-        `By: @${actor}\n\n` +
-        `[View Comment](${comment.html_url})`
-      );
+    // case 'IssueCommentEvent':
+    //   const comment = event.payload.comment;
+    //   const commentIssue = event.payload.issue;
+    //   return (
+    //     `🔔 **New Comment in ${owner}/${repo}**\n\n` +
+    //     `On: ${commentIssue.title}\n` +
+    //     `By: @${actor}\n\n` +
+    //     `[View Comment](${comment.html_url})`
+    //   );
 
     default:
       // Ignore other event types
