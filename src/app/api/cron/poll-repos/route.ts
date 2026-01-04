@@ -151,9 +151,10 @@ function shouldNotify(event: any, watchedRepo: any): boolean {
 function formatEventMessage(event: any, owner: string, repo: string, currentUser?: string): string | null {
   const actor = event.actor?.login || 'Someone';
   const esc = (text: string) => text ? text.replace(/_/g, '\\_') : '';
-
   const safeOwner = esc(owner);
   const safeRepo = esc(repo);
+  
+  console.log(`Formatting event for ${owner}/${repo}`);
 
   switch (event.type) {
     case 'IssuesEvent':
