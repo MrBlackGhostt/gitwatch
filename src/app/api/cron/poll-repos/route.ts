@@ -93,7 +93,7 @@ export async function GET(request: Request) {
             try {
               console.log(`Sending notification for ${event.type} to ${user.telegramId}`);
               await telegram.sendMessage(user.telegramId.toString(), message, {
-                parse_mode: 'Markdown',
+                parse_mode: 'HTML',
                 link_preview_options: { is_disabled: true },
               });
               results.notifications++;
@@ -147,12 +147,11 @@ function shouldNotify(event: any, watchedRepo: any): boolean {
   }
 }
 
-// Format GitHub event into a readable Telegram message
+// Format GitHub event into a readable Telegram message (HTML format)
 function formatEventMessage(event: any, owner: string, repo: string, currentUser?: string): string | null {
   const actor = event.actor?.login || 'Someone';
-  const esc = (text: string) => text ? text.replace(/_/g, '\\_') : '';
-  const safeOwner = esc(owner);
-  const safeRepo = esc(repo);
+  // HTML escape function for special characters
+  const escHtml = (text: string) => text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
   
   console.log(`Formatting event for ${owner}/${repo}`);
 
@@ -163,21 +162,21 @@ function formatEventMessage(event: any, owner: string, repo: string, currentUser
       if (issueAction === 'opened' || issueAction === 'closed') {
         const issueStatus = issueAction === 'opened' ? 'New Issue' : 'Issue Closed';
         return (
-          `**${issueStatus}**\n` +
-          `Repo: ${safeOwner}/${safeRepo}\n` +
-          `Issue: ${esc(issue.title)}\n` +
-          `By: @${esc(actor)}\n\n` +
-          `[View Issue](${issue.html_url})`
+          `<b>${issueStatus}</b>\n` +
+          `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+          `Issue: ${escHtml(issue.title)}\n` +
+          `By: @${escHtml(actor)}\n\n` +
+          `<a href="${issue.html_url}">View Issue</a>`
         );
       } else if (issueAction === 'assigned') {
         const assignee = event.payload.assignee.login;
-        const target = currentUser === assignee ? 'You have' : `@${esc(assignee)} has`;
+        const target = currentUser === assignee ? 'You have' : `@${escHtml(assignee)} has`;
         return (
-          `**Issue Assigned**\n` +
-          `Repo: ${safeOwner}/${safeRepo}\n` +
-          `Issue: ${esc(issue.title)}\n` +
-          `${target} been assigned by @${esc(actor)}\n\n` +
-          `[View Issue](${issue.html_url})`
+          `<b>Issue Assigned</b>\n` +
+          `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+          `Issue: ${escHtml(issue.title)}\n` +
+          `${target} been assigned by @${escHtml(actor)}\n\n` +
+          `<a href="${issue.html_url}">View Issue</a>`
         );
       }
       return null;
@@ -192,40 +191,36 @@ function formatEventMessage(event: any, owner: string, repo: string, currentUser
         }
 
         return (
-          `**${prStatus}**\n` +
-          `Repo: ${safeOwner}/${safeRepo}\n` +
-          `PR: ${esc(pr.title)}\n` +
-          `By: @${esc(actor)}\n\n` +
-          `[View PR](${pr.html_url})`
+          `<b>${prStatus}</b>\n` +
+          `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+          `PR: ${escHtml(pr.title)}\n` +
+          `By: @${escHtml(actor)}\n\n` +
+          `<a href="${pr.html_url}">View PR</a>`
         );
       } else if (prAction === 'assigned') {
         const assignee = event.payload.assignee.login;
-        const target = currentUser === assignee ? 'You have' : `@${esc(assignee)} has`;
+        const target = currentUser === assignee ? 'You have' : `@${escHtml(assignee)} has`;
         return (
-          `**PR Assigned**\n` +
-          `Repo: ${safeOwner}/${safeRepo}\n` +
-          `PR: ${esc(pr.title)}\n` +
-          `${target} been assigned by @${esc(actor)}\n\n` +
-          `[View PR](${pr.html_url})`
+          `<b>PR Assigned</b>\n` +
+          `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+          `PR: ${escHtml(pr.title)}\n` +
+          `${target} been assigned by @${escHtml(actor)}\n\n` +
+          `<a href="${pr.html_url}">View PR</a>`
         );
       }
       return null;
 
     case 'PushEvent':
       const branch = event.payload.ref ? event.payload.ref.replace('refs/heads/', '') : 'unknown';
-      // GitHub API sometimes returns size: 0 but has commits in the payload
       const commitCount = event.payload.size ?? event.payload.commits?.length ?? 0;
-      
-      // If we still show 0 commits but there's a push, it might be a force push or empty commit
-      // We'll show it anyway to be safe, but label it appropriately
       const commitText = commitCount === 1 ? '1 new commit' : `${commitCount} new commits`;
       
       return (
-        `**New Push**\n` +
-        `Repo: ${safeOwner}/${safeRepo}\n` +
-        `Branch: \`${esc(branch)}\`\n` +
-        `${commitText} by @${esc(actor)}\n\n` +
-        `[View Changes](https://github.com/${owner}/${repo}/compare/${event.payload.before}...${event.payload.head})`
+        `<b>New Push</b>\n` +
+        `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+        `Branch: <code>${escHtml(branch)}</code>\n` +
+        `${commitText} by @${escHtml(actor)}\n\n` +
+        `<a href="https://github.com/${owner}/${repo}/compare/${event.payload.before}...${event.payload.head}">View Changes</a>`
       );
 
     case 'IssueCommentEvent':
@@ -235,11 +230,11 @@ function formatEventMessage(event: any, owner: string, repo: string, currentUser
       const type = !!commentIssue.pull_request ? 'PR' : 'Issue';
       
       return (
-        `**New Comment (${type})**\n` +
-        `Repo: ${safeOwner}/${safeRepo}\n` +
-        `On: ${esc(commentIssue.title)}\n` +
-        `By: @${esc(actor)}\n\n` +
-        `[View Comment](${comment.html_url})`
+        `<b>New Comment (${type})</b>\n` +
+        `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+        `On: ${escHtml(commentIssue.title)}\n` +
+        `By: @${escHtml(actor)}\n\n` +
+        `<a href="${comment.html_url}">View Comment</a>`
       );
 
     default:

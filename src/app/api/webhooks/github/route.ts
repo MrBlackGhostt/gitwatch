@@ -65,51 +65,51 @@ export async function POST(req: NextRequest) {
         const action = data.action;
         const issue = data.issue;
         if (action === 'opened') {
-          message = `**New Issue**\n` +
+          message = `<b>New Issue</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `Issue: ${issue.title}\n` +
                     `By: @${actor}\n\n` +
-                    `[View Issue](${issue.html_url})`;
+                    `<a href="${issue.html_url}">View Issue</a>`;
         } else if (action === 'closed') {
-          message = `**Issue Closed**\n` +
+          message = `<b>Issue Closed</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `Issue: ${issue.title}\n` +
                     `By: @${actor}\n\n` +
-                    `[View Issue](${issue.html_url})`;
+                    `<a href="${issue.html_url}">View Issue</a>`;
         } else if (action === 'assigned') {
           const assignee = data.assignee.login;
           const target = watched.user.githubUsername === assignee ? 'You have' : `@${assignee} has`;
-          message = `**Issue Assigned**\n` +
+          message = `<b>Issue Assigned</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `Issue: ${issue.title}\n` +
                     `${target} been assigned by @${actor}\n\n` +
-                    `[View Issue](${issue.html_url})`;
+                    `<a href="${issue.html_url}">View Issue</a>`;
         }
       } 
       else if (event === 'pull_request' && watched.notifyPRs) {
         const action = data.action;
         const pr = data.pull_request;
         if (action === 'opened') {
-          message = `**New Pull Request**\n` +
+          message = `<b>New Pull Request</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `PR: ${pr.title}\n` +
                     `By: @${actor}\n\n` +
-                    `[View PR](${pr.html_url})`;
+                    `<a href="${pr.html_url}">View PR</a>`;
         } else if (action === 'closed') {
           const status = pr.merged ? 'Merged' : 'Closed';
-          message = `**PR ${status}**\n` +
+          message = `<b>PR ${status}</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `PR: ${pr.title}\n` +
                     `By: @${actor}\n\n` +
-                    `[View PR](${pr.html_url})`;
+                    `<a href="${pr.html_url}">View PR</a>`;
         } else if (action === 'assigned') {
           const assignee = data.assignee.login;
           const target = watched.user.githubUsername === assignee ? 'You have' : `@${assignee} has`;
-          message = `**PR Assigned**\n` +
+          message = `<b>PR Assigned</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `PR: ${pr.title}\n` +
                     `${target} been assigned by @${actor}\n\n` +
-                    `[View PR](${pr.html_url})`;
+                    `<a href="${pr.html_url}">View PR</a>`;
         }
       }
       else if (event === 'push' && watched.notifyCommits) {
@@ -117,11 +117,11 @@ export async function POST(req: NextRequest) {
         if (commits.length > 0) {
           const branch = data.ref.replace('refs/heads/', '');
           const commitText = commits.length === 1 ? '1 new commit' : `${commits.length} new commits`;
-          message = `**New Push**\n` +
+          message = `<b>New Push</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
-                    `Branch: \`${branch}\`\n` +
+                    `Branch: <code>${branch}</code>\n` +
                     `${commitText} by @${actor}\n\n` +
-                    `[View Changes](${data.compare})`;
+                    `<a href="${data.compare}">View Changes</a>`;
         }
       }
       else if (event === 'issue_comment' && watched.notifyComments) {
@@ -130,18 +130,18 @@ export async function POST(req: NextRequest) {
           const comment = data.comment;
           const isPR = !!data.issue.pull_request;
           const type = isPR ? 'PR' : 'Issue';
-          message = `**New Comment (${type})**\n` +
+          message = `<b>New Comment (${type})</b>\n` +
                     `Repo: ${owner}/${repo}\n` +
                     `On: ${data.issue.title}\n` +
                     `By: @${actor}\n\n` +
-                    `[View Comment](${comment.html_url})`;
+                    `<a href="${comment.html_url}">View Comment</a>`;
         }
       }
 
       if (message) {
         try {
           await bot.telegram.sendMessage(watched.user.telegramId.toString(), message, {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             link_preview_options: { is_disabled: true },
           });
         } catch (err) {
