@@ -76,6 +76,14 @@ export async function POST(req: NextRequest) {
                     `Issue: ${issue.title}\n` +
                     `By: @${actor}\n\n` +
                     `[View Issue](${issue.html_url})`;
+        } else if (action === 'assigned') {
+          const assignee = data.assignee.login;
+          const target = watched.user.githubUsername === assignee ? 'You have' : `@${assignee} has`;
+          message = `**Issue Assigned**\n` +
+                    `Repo: ${owner}/${repo}\n` +
+                    `Issue: ${issue.title}\n` +
+                    `${target} been assigned by @${actor}\n\n` +
+                    `[View Issue](${issue.html_url})`;
         }
       } 
       else if (event === 'pull_request' && watched.notifyPRs) {
@@ -93,6 +101,14 @@ export async function POST(req: NextRequest) {
                     `Repo: ${owner}/${repo}\n` +
                     `PR: ${pr.title}\n` +
                     `By: @${actor}\n\n` +
+                    `[View PR](${pr.html_url})`;
+        } else if (action === 'assigned') {
+          const assignee = data.assignee.login;
+          const target = watched.user.githubUsername === assignee ? 'You have' : `@${assignee} has`;
+          message = `**PR Assigned**\n` +
+                    `Repo: ${owner}/${repo}\n` +
+                    `PR: ${pr.title}\n` +
+                    `${target} been assigned by @${actor}\n\n` +
                     `[View PR](${pr.html_url})`;
         }
       }

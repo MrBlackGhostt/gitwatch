@@ -88,7 +88,7 @@ export async function GET(request: Request) {
             continue;
           }
 
-          const message = formatEventMessage(event, owner, repo);
+          const message = formatEventMessage(event, owner, repo, user.githubUsername || undefined);
           if (message) {
             try {
               console.log(`Sending notification for ${event.type} to ${user.telegramId}`);
@@ -148,41 +148,63 @@ function shouldNotify(event: any, watchedRepo: any): boolean {
 }
 
 // Format GitHub event into a readable Telegram message
-function formatEventMessage(event: any, owner: string, repo: string): string | null {
+function formatEventMessage(event: any, owner: string, repo: string, currentUser?: string): string | null {
   const actor = event.actor?.login || 'Someone';
 
   switch (event.type) {
     case 'IssuesEvent':
       const issue = event.payload.issue;
       const issueAction = event.payload.action;
-      if (issueAction !== 'opened' && issueAction !== 'closed') return null;
-      
-      const issueStatus = issueAction === 'opened' ? 'New Issue' : 'Issue Closed';
-      return (
-        `**${issueStatus}**\n` +
-        `Repo: ${owner}/${repo}\n` +
-        `Issue: ${issue.title}\n` +
-        `By: @${actor}\n\n` +
-        `[View Issue](${issue.html_url})`
-      );
+      if (issueAction === 'opened' || issueAction === 'closed') {
+        const issueStatus = issueAction === 'opened' ? 'New Issue' : 'Issue Closed';
+        return (
+          `**${issueStatus}**\n` +
+          `Repo: ${owner}/${repo}\n` +
+          `Issue: ${issue.title}\n` +
+          `By: @${actor}\n\n` +
+          `[View Issue](${issue.html_url})`
+        );
+      } else if (issueAction === 'assigned') {
+        const assignee = event.payload.assignee.login;
+        const target = currentUser === assignee ? 'You have' : `@${assignee} has`;
+        return (
+          `**Issue Assigned**\n` +
+          `Repo: ${owner}/${repo}\n` +
+          `Issue: ${issue.title}\n` +
+          `${target} been assigned by @${actor}\n\n` +
+          `[View Issue](${issue.html_url})`
+        );
+      }
+      return null;
 
     case 'PullRequestEvent':
       const pr = event.payload.pull_request;
       const prAction = event.payload.action;
-      if (prAction !== 'opened' && prAction !== 'closed') return null;
+      if (prAction === 'opened' || prAction === 'closed') {
+        let prStatus = 'New Pull Request';
+        if (prAction === 'closed') {
+          prStatus = pr.merged ? 'PR Merged' : 'PR Closed';
+        }
 
-      let prStatus = 'New Pull Request';
-      if (prAction === 'closed') {
-        prStatus = pr.merged ? 'PR Merged' : 'PR Closed';
+        return (
+          `**${prStatus}**\n` +
+          `Repo: ${owner}/${repo}\n` +
+          `PR: ${pr.title}\n` +
+          `By: @${actor}\n\n` +
+          `[View PR](${pr.html_url})`
+        );
+      } else if (prAction === 'assigned') {
+        const assignee = event.payload.assignee.login;
+        const target = currentUser === assignee ? 'You have' : `@${assignee} has`;
+        return (
+          `**PR Assigned**\n` +
+          `Repo: ${owner}/${repo}\n` +
+          `PR: ${pr.title}\n` +
+          `${target} been assigned by @${actor}\n\n` +
+          `[View PR](${pr.html_url})`
+        );
       }
-
-      return (
-        `**${prStatus}**\n` +
-        `Repo: ${owner}/${repo}\n` +
-        `PR: ${pr.title}\n` +
-        `By: @${actor}\n\n` +
-        `[View PR](${pr.html_url})`
-      );
+      return null;
 
     case 'PushEvent':
       const branch = event.payload.ref.replace('refs/heads/', '');
