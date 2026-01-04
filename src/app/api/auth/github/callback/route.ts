@@ -1,6 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../../../lib/prisma';
 import { Telegraf } from 'telegraf';
+import crypto from 'crypto';
+
+// Verify HMAC-signed state
+function verifyState(state: string): { telegramId: string; timestamp: number } | null {
+  try {
+    const decoded = JSON.parse(Buffer.from(state, 'base64').toString());
+    const { payload, signature } = decoded;
+    
+    // Verify signature
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.GITHUB_WEBHOOK_SECRET || 'fallback-secret')
+      .update(payload)
+      .digest('hex');
+    
+    if (signature !== expectedSignature) {
+      console.error('OAuth state signature mismatch - possible attack attempt');
+      return null;
+    }
+    
+    const data = JSON.parse(payload);
+    
+    // Check timestamp (reject if older than 10 minutes)
+    const maxAge = 10 * 60 * 1000; // 10 minutes
+    if (Date.now() - data.timestamp > maxAge) {
+      console.error('OAuth state expired');
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Failed to verify OAuth state:', error);
+    return null;
+  }
+}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -11,8 +45,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing code or state' }, { status: 400 });
   }
 
-  // Decode state to get telegram_id
-  const { telegramId } = JSON.parse(Buffer.from(state, 'base64').toString());
+  // Verify and decode state
+  const stateData = verifyState(state);
+  if (!stateData) {
+    return NextResponse.json({ error: 'Invalid or expired state' }, { status: 403 });
+  }
+  
+  const { telegramId } = stateData;
 
   // Exchange code for access token
   const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {

@@ -1,9 +1,21 @@
 import { Telegraf, Markup } from 'telegraf';
 import { prisma } from '../../prisma';
+import { checkUserRateLimit } from '../../rate-limiter';
 
 export function registerWatchCommand(bot: Telegraf) {
   bot.command('watch', async (ctx) => {
     const telegramId = BigInt(ctx.from.id);
+
+    // Rate limit: 5 watch commands per minute per user
+    const rateLimit = checkUserRateLimit(telegramId.toString(), 'watch', { 
+      maxRequests: 5, 
+      windowMs: 60000 
+    });
+    
+    if (!rateLimit.allowed) {
+      const waitSeconds = Math.ceil(rateLimit.resetIn / 1000);
+      return ctx.reply(`⏳ Too many requests. Please wait ${waitSeconds} seconds.`);
+    }
 
     try {
       // Get user from database

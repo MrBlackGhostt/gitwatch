@@ -17,8 +17,8 @@ fi
 echo "1️⃣ Testing polling endpoint..."
 echo ""
 
-response=$(curl -s -H "Authorization: Bearer QQMUX0JqeNuIrPVha2cGf+WDJ6JgfbFK590D1R8aD9Y=" \
-  https://gitwaatch.vercel.app/api/cron/poll-repos)
+response=$(curl -s -H "Authorization: Bearer $CRON_SECRET" \
+  "${NEXT_PUBLIC_APP_URL:-https://gitwaatch.vercel.app}/api/cron/poll-repos")
 
 echo "Response:"
 echo "$response" | jq '.' 2>/dev/null || echo "$response"
