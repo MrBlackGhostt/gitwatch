@@ -15,6 +15,7 @@ export function registerHelpCommand(bot: Telegraf) {
 /disconnect - Remove GitHub connection
 
 ℹ️ **Info**
+/clear - Clear the chat screen visually
 /help - Show this help message
 
 ---

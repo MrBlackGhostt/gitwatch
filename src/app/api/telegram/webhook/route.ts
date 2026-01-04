@@ -5,6 +5,7 @@ import { registerHelpCommand } from '../../../../../lib/telegram/commands/help';
 import { registerWatchlistCommand } from '../../../../../lib/telegram/commands/watchlist';
 import { registerDisconnectCommand } from '../../../../../lib/telegram/commands/disconnect';
 import { registerUnwatchCommand } from '../../../../../lib/telegram/commands/unwatch';
+import { registerClearCommand } from '../../../../../lib/telegram/commands/clear';
 
 // Initialize bot (without launch - we'll handle updates via webhook)
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN!);
@@ -45,6 +46,7 @@ registerHelpCommand(bot);
 registerWatchlistCommand(bot);
 registerDisconnectCommand(bot);
 registerUnwatchCommand(bot);
+registerClearCommand(bot);
 
 // Set bot commands for UI suggestions
 bot.telegram.setMyCommands([
@@ -53,6 +55,7 @@ bot.telegram.setMyCommands([
   { command: 'watchlist', description: 'View all watched repositories' },
   { command: 'unwatch', description: 'Stop watching a repository' },
   { command: 'disconnect', description: 'Disconnect GitHub and remove all watches' },
+  { command: 'clear', description: 'Clear the chat screen visually' },
   { command: 'help', description: 'Show help message' },
 ]);
 
