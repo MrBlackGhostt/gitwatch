@@ -48,7 +48,7 @@
 8. ✅ Add/remove repositories to watchlist
 9. ✅ Watch multiple repositories per user
 10. ✅ Instant notifications for new issues
-11. ⏳ Instant notifications when an issue is assigned
+11. ✅ Personalized notifications for assignments
 12. ✅ Notifications for issue state changes (Closed/Merged)
 13. ✅ Notifications for issue and PR comments
 14. ✅ Notifications for pull requests
@@ -433,6 +433,7 @@ Bind repositories to Telegram groups and enable your entire team to discuss, ass
 - ✅ Webhook support (real-time)
 - ✅ Hybrid Polling mode for external repos
 - ✅ Per-repository notification preferences
+- ✅ Personalized assignment alerts (Issue/PR)
 
 ### Phase 2: Interactivity & Management (In Progress)
 - ⏳ Inline action buttons (Close/Assign/Reopen from Telegram)
