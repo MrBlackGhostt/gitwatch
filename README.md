@@ -40,19 +40,21 @@
 
 1. ✅ Telegram bot interface
 2. ✅ GitHub API integration
-3. ✅ GitHub Webhook support (real-time, no polling)
-4. ⏳ GitHub OAuth authentication per user
-5. ⏳ Public repository support
-6. ⏳ Private repository support (paid tier)
-7. ⏳ Per-user watchlists
-8. ⏳ Add/remove repositories to watchlist
-9. ⏳ Watch multiple repositories per user
-10. ⏳ Instant notifications when a new issue is created
+3. ✅ GitHub Webhook support (real-time)
+4. ✅ GitHub OAuth authentication per user
+5. ✅ Public repository support
+6. ⏳ Private repository support (planned)
+7. ✅ Per-user watchlists
+8. ✅ Add/remove repositories to watchlist
+9. ✅ Watch multiple repositories per user
+10. ✅ Instant notifications for new issues
 11. ⏳ Instant notifications when an issue is assigned
-12. ⏳ Notifications for issue updates
-13. ⏳ Notifications for issue comments
-14. ⏳ Notifications for pull requests
-15. ⏳ Notifications for commits
+12. ✅ Notifications for issue state changes (Closed/Merged)
+13. ✅ Notifications for issue and PR comments
+14. ✅ Notifications for pull requests
+15. ✅ Notifications for commits (Pushes)
+
+</details>
 
 </details>
 
@@ -256,12 +258,12 @@
 <details>
 <summary><b>Expand to see UX features</b></summary>
 
-99. ⏳ Guided setup flows
-100. ⏳ Interactive command prompts
-101. ⏳ Inline action buttons
-102. ⏳ Minimal command surface
+99. ✅ Guided setup flows (OAuth → Watch)
+100. ✅ Interactive command prompts (Preferences menu)
+101. ⏳ Inline action buttons (Manage issues from chat)
+102. ✅ Minimal command surface
 103. ⏳ Preview before confirmation
-104. ⏳ Telegram-native UX patterns
+104. ✅ Telegram-native UX patterns
 
 </details>
 
@@ -288,13 +290,13 @@
 <details>
 <summary><b>Expand to see technical architecture</b></summary>
 
-111. ⏳ Webhook-driven architecture
-112. ⏳ Queue-based event processing
-113. ⏳ Redis / message queue support
-114. ⏳ Persistent database (PostgreSQL)
-115. ⏳ Scalable worker design
+111. ✅ Webhook-driven architecture
+112. ⏳ Queue-based event processing (planned)
+113. ⏳ Redis / message queue support (planned)
+114. ✅ Persistent database (PostgreSQL + Prisma)
+115. ✅ Hybrid Notification System (Webhook + Polling)
 116. ⏳ Rate-limit aware GitHub client
-117. ⏳ Modular bot command system
+117. ✅ Modular bot command system
 
 </details>
 
@@ -317,15 +319,14 @@
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js 16.1](https://nextjs.org/) with App Router
+- **Framework:** [Next.js 16](https://nextjs.org/) with App Router
 - **Language:** [TypeScript 5](https://www.typescriptlang.org/)
 - **UI Framework:** [React 19](https://react.dev/)
 - **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
-- **Bot Platform:** [Telegram Bot API](https://core.telegram.org/bots)
-- **Version Control Integration:** [GitHub API](https://docs.github.com/en/rest) + Webhooks
-- **Database:** PostgreSQL (planned)
-- **Queue:** Redis (planned)
-- **Deployment:** Vercel / Docker
+- **Bot Platform:** [Telegram Bot API](https://core.telegram.org/bots) via [Telegraf](https://telegraf.js.org/)
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **Database:** PostgreSQL (Neon/Supabase)
+- **Deployment:** Vercel
 
 ---
 
@@ -385,18 +386,15 @@ NEXTAUTH_URL=http://localhost:3000
 
 ## 📖 Usage
 
-### Basic Commands (Planned)
+### Basic Commands
 
 ```
-/start - Initialize the bot
-/watch <repo> - Start watching a repository
+/start - Initialize the bot & connect GitHub
+/watch <repo> - Watch a repository (interactive menu)
 /unwatch <repo> - Stop watching a repository
-/list - Show your watchlist
-/role <repo> <role> - Set your role (maintainer/contributor/watcher)
-/filter <repo> <filters> - Configure notification filters
-/mute <repo> <duration> - Temporarily mute notifications
-/stats <repo> - View repository analytics
+/watchlist - Show your active watches
 /help - Show all available commands
+/disconnect - Revoke GitHub access and clear data
 ```
 
 ### Quick Actions from Notifications
@@ -428,12 +426,19 @@ Bind repositories to Telegram groups and enable your entire team to discuss, ass
 
 ## 🗺️ Roadmap
 
-### Phase 1: Foundation (Q1 2026)
+### Phase 1: Foundation (COMPLETED)
 - ✅ Basic Telegram bot setup
 - ✅ GitHub API integration
-- ⏳ OAuth authentication
-- ⏳ Webhook support
-- ⏳ Basic notifications
+- ✅ OAuth authentication
+- ✅ Webhook support (real-time)
+- ✅ Hybrid Polling mode for external repos
+- ✅ Per-repository notification preferences
+
+### Phase 2: Interactivity & Management (In Progress)
+- ⏳ Inline action buttons (Close/Assign/Reopen from Telegram)
+- ⏳ Manual Webhook setup for contributors
+- ⏳ Organization-wide watching
+- ⏳ Daily activity summary (Digest mode)
 
 ### Phase 2: Smart Filtering (Q2 2026)
 - Role-based notification rules
