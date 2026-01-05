@@ -30,8 +30,8 @@ export function registerWatchCommand(bot: Telegraf) {
         );
       }
 
-      // Check if user can add more repos (plan limit)
-      const repoLimit = await canUserAddRepo(user.id, user.plan as 'free' | 'premium');
+      // Check if user can add more repos (plan limit, default to 'free' for safety)
+      const repoLimit = await canUserAddRepo(user.id, (user.plan || 'free') as 'free' | 'premium');
       
       if (!repoLimit.allowed) {
         return ctx.reply(

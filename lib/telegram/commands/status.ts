@@ -23,8 +23,8 @@ export function registerStatusCommand(bot: Telegraf) {
         );
       }
 
-      // Get repo limit info using user's actual plan
-      const plan = user.plan as 'free' | 'premium';
+      // Get repo limit info using user's actual plan (default to 'free' for safety)
+      const plan = (user.plan || 'free') as 'free' | 'premium';
       const repoLimit = await canUserAddRepo(user.id, plan);
       const planInfo = PLAN_LIMITS[plan];
 
