@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
 import { prisma } from '../../prisma';
-import { canUserAddRepo, getPlatformStats } from '../../subscription/check-limits';
+import { canUserAddRepo } from '../../subscription/check-limits';
 import { PLAN_LIMITS } from '../../config/limits';
 
 export function registerStatusCommand(bot: Telegraf) {
@@ -28,30 +28,31 @@ export function registerStatusCommand(bot: Telegraf) {
       const repoLimit = await canUserAddRepo(user.id, plan);
       const planInfo = PLAN_LIMITS[plan];
 
-      // Build status message
+      // Build status message (using HTML for safety with special chars)
       const githubStatus = user.githubToken 
-        ? `✅ Connected (@${user.githubUsername})`
+        ? `✅ Connected (@${user.githubUsername || 'unknown'})`
         : '❌ Not connected';
 
       const repoList = user.watchedRepos.length > 0
         ? user.watchedRepos.map(r => `  • ${r.owner}/${r.repo}`).join('\n')
         : '  None yet';
 
+      const upgradeHint = repoLimit.current >= repoLimit.limit 
+        ? '💎 Upgrade to Premium for 5 repos: /upgrade' 
+        : `You can add ${repoLimit.limit - repoLimit.current} more repos`;
+
       await ctx.reply(
-        `📊 **Your GitWatch Status**\n\n` +
-        `**Plan:** ${planInfo.displayName}\n` +
-        `**Repositories:** ${repoLimit.current}/${repoLimit.limit}\n` +
-        `**GitHub:** ${githubStatus}\n\n` +
-        `**Watched Repos:**\n${repoList}\n\n` +
-        `${repoLimit.current >= repoLimit.limit 
-          ? '💎 Upgrade to Premium for 5 repos: /upgrade' 
-          : `You can add ${repoLimit.limit - repoLimit.current} more repos`}`,
-        { parse_mode: 'Markdown' }
+        `📊 <b>Your GitWatch Status</b>\n\n` +
+        `<b>Plan:</b> ${planInfo.displayName}\n` +
+        `<b>Repositories:</b> ${repoLimit.current}/${repoLimit.limit}\n` +
+        `<b>GitHub:</b> ${githubStatus}\n\n` +
+        `<b>Watched Repos:</b>\n${repoList}\n\n` +
+        upgradeHint,
+        { parse_mode: 'HTML' }
       );
     } catch (error) {
       console.error('Error in status command:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await ctx.reply(`❌ Error: ${errorMessage.substring(0, 100)}`);
+      await ctx.reply('❌ An error occurred. Please try again.');
     }
   });
 }
