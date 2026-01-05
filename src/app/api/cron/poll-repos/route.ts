@@ -263,14 +263,23 @@ function formatEventMessage(event: any, owner: string, repo: string, currentUser
 
     case 'PushEvent':
       const branch = event.payload.ref ? event.payload.ref.replace('refs/heads/', '') : 'unknown';
-      const commitCount = event.payload.size ?? event.payload.commits?.length ?? 0;
+      const commits = event.payload.commits || [];
+      const commitCount = event.payload.size ?? commits.length ?? 0;
       const commitText = commitCount === 1 ? '1 new commit' : `${commitCount} new commits`;
+      
+      // Get commit messages (up to 3)
+      const commitMessages = commits
+        .slice(0, 3)
+        .map((c: any) => `• ${escHtml(c.message.split('\n')[0].substring(0, 50))}`)
+        .join('\n');
+      const moreCommits = commitCount > 3 ? `\n... and ${commitCount - 3} more` : '';
       
       return (
         `<b>New Push</b>\n` +
         `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
         `Branch: <code>${escHtml(branch)}</code>\n` +
         `${commitText} by @${escHtml(actor)}\n\n` +
+        `<b>Commits:</b>\n${commitMessages}${moreCommits}\n\n` +
         `<a href="https://github.com/${owner}/${repo}/compare/${event.payload.before}...${event.payload.head}">View Changes</a>`
       );
 

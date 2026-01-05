@@ -116,11 +116,24 @@ export async function POST(req: NextRequest) {
         const commits = data.commits || [];
         if (commits.length > 0) {
           const branch = data.ref.replace('refs/heads/', '');
-          const commitText = commits.length === 1 ? '1 new commit' : `${commits.length} new commits`;
+          const commitCount = commits.length;
+          const commitText = commitCount === 1 ? '1 new commit' : `${commitCount} new commits`;
+          
+          // HTML escape function
+          const escHtml = (text: string) => text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+          
+          // Get commit messages (up to 3)
+          const commitMessages = commits
+            .slice(0, 3)
+            .map((c: any) => `• ${escHtml(c.message.split('\n')[0].substring(0, 50))}`)
+            .join('\n');
+          const moreCommits = commitCount > 3 ? `\n... and ${commitCount - 3} more` : '';
+          
           message = `<b>New Push</b>\n` +
-                    `Repo: ${owner}/${repo}\n` +
-                    `Branch: <code>${branch}</code>\n` +
-                    `${commitText} by @${actor}\n\n` +
+                    `Repo: ${escHtml(owner)}/${escHtml(repo)}\n` +
+                    `Branch: <code>${escHtml(branch)}</code>\n` +
+                    `${commitText} by @${escHtml(actor)}\n\n` +
+                    `<b>Commits:</b>\n${commitMessages}${moreCommits}\n\n` +
                     `<a href="${data.compare}">View Changes</a>`;
         }
       }
