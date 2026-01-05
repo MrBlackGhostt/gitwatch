@@ -50,7 +50,8 @@ export function registerStatusCommand(bot: Telegraf) {
       );
     } catch (error) {
       console.error('Error in status command:', error);
-      await ctx.reply('❌ An error occurred. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      await ctx.reply(`❌ Error: ${errorMessage.substring(0, 100)}`);
     }
   });
 }
